@@ -1,0 +1,88 @@
+name: k6 Performance Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1-5'   # smoke + load toda semana, seg–sex às 6h
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Tipo de teste'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - load
+      base_url:
+        description: 'URL base (opcional — usa vars.BASE_URL se vazio)'
+        required: false
+        default: ''
+
+# Evita execuções paralelas no mesmo branch
+concurrency:
+  group: k6-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─── Smoke: sempre executa ────────────────────────────────────────────────
+  smoke:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Rodar smoke test
+        run: |
+          mkdir -p reports
+          K6_WEB_DASHBOARD=true \
+          K6_WEB_DASHBOARD_PORT=-1 \
+          K6_WEB_DASHBOARD_EXPORT=reports/smoke-report.html \
+          k6 run tests/quickpizza.js
+        env:
+          BASE_URL: ${{ inputs.base_url || vars.BASE_URL || 'https://quickpizza.grafana.com' }}
+
+      - name: Upload relatório smoke
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report-${{ github.run_id }}
+          path: reports/smoke-report.html
+          retention-days: 14
+
+  # ─── Load: só em schedule ou dispatch manual com test_type=load ──────────
+  load:
+    name: Load Test
+    needs: smoke
+    if: |
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.test_type == 'load')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Rodar load test
+        run: |
+          mkdir -p reports
+          K6_WEB_DASHBOARD=true \
+          K6_WEB_DASHBOARD_PORT=-1 \
+          K6_WEB_DASHBOARD_EXPORT=reports/load-report.html \
+          k6 run tests/load-quickpizza.js
+        env:
+          BASE_URL: ${{ inputs.base_url || vars.BASE_URL || 'https://quickpizza.grafana.com' }}
+
+      - name: Upload relatório load
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-report-${{ github.run_id }}
+          path: reports/load-report.html
+          retention-days: 30

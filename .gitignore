@@ -1,0 +1,20 @@
+# Logs
+*.log
+
+# Dependencies
+node_modules/
+
+# macOS
+.DS_Store
+
+# VS Code (exceto configurações compartilhadas do projeto)
+.vscode/*
+!.vscode/mcp.json
+
+# Variáveis de ambiente (nunca versionar credenciais)
+.env
+.env.local
+.env.*.local
+
+# Relatórios gerados pelo web dashboard
+reports/

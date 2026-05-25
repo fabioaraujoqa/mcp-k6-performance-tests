@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "k6": {
+      "type": "stdio",
+      "command": "mcp-k6"
+    }
+  }
+}
