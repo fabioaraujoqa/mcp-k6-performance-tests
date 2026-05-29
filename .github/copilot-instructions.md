@@ -43,9 +43,21 @@ Sempre que o k6 MCP estiver ativo, siga esta ordem:
 1. `validate_script` — valida sintaxe e executa 1 VU / 1 iteração
 2. `run_script` — executa o teste completo e retorna métricas
 3. Analise os resultados antes de iterar
-4. `get_documentation` — consulte a doc oficial quando necessário
+4. `list_sections` → `get_documentation` — explore a árvore de docs antes de buscar seções específicas
 
 Nunca execute `run_script` sem antes executar `validate_script`.
+
+### Recursos MCP
+
+| Recurso | Quando usar |
+|---|---|
+| `docs://k6/best_practices` | Boas práticas oficiais curadas pela Grafana — consulte ao criar qualquer script |
+| `types://k6/...` | Definições TypeScript — confirma caminhos de import, formatos de `options`, nomes de métricas |
+
+### Prompts MCP nativos
+
+- `generate_script` — gera script k6 pronto para produção a partir de linguagem natural
+- `convert_playwright_script` — converte teste Playwright em `k6/browser`
 
 ## Variáveis de ambiente
 

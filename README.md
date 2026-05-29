@@ -4,6 +4,8 @@ Template reusável para testes de performance com k6 + GitHub Copilot Agent Mode
 
 Inclui scripts de exemplo, boas práticas, agent instructions, guardrails e prompts prontos para uso.
 
+> **Dois modos de uso:** via **agente de IA** (Copilot Agent Mode — loop autônomo, geração e análise) ou via **scripts Node.js diretos** (`scripts/`) — sem IA, ideal para CI/CD e automação.
+
 ## Configuração do MCP
 
 Este projeto usa configuração local do MCP (arquivo `.vscode/mcp.json`).
@@ -142,10 +144,16 @@ O arquivo [`docs/boas-praticas.md`](docs/boas-praticas.md) funciona como **RAG l
     loop-autonomo.prompt.md        → /loop-autonomo — ciclo completo autônomo
 .vscode/
   mcp.json                         → configuração local do k6 MCP Server
+scripts/                           → cliente MCP sem agente (Node.js direto)
+  mcp-runner.js                    → cria e conecta o cliente MCP
+  validate.js                      → CLI: valida um script k6
+  run.js                           → CLI: executa um script k6
+  README.md                        → documentação detalhada dos scripts
 tests/
   quickpizza.js                    → script de exemplo
 docs/
   boas-praticas.md                 → referência completa + base de conhecimento do agente
+package.json                       → dependência @modelcontextprotocol/sdk
 run.sh                             → helper para execução com/sem dashboard
 .env.example                       → modelo de variáveis de ambiente
 reports/                           → relatórios HTML gerados (gitignored)
@@ -163,3 +171,36 @@ reports/                           → relatórios HTML gerados (gitignored)
 # Com dashboard + exportar relatório HTML (salvo em reports/)
 ./run.sh tests/quickpizza.js --report
 ```
+
+## Usando o MCP sem agente de IA
+
+A pasta [`scripts/`](scripts/) contém um cliente MCP em Node.js para chamar as tools do k6 diretamente — sem Copilot, sem LLM, sem VS Code.
+
+```bash
+npm install
+
+# Valida o script (1 VU, 1 iteração)
+node scripts/validate.js tests/smoke-pokeapi.js
+
+# Executa o teste
+node scripts/run.js tests/smoke-pokeapi.js
+
+# Sobrescreve VUs e duração
+node scripts/run.js tests/load-quickpizza.js 10 2m
+```
+
+Ideal para **pipelines de CI/CD** onde você quer o MCP sem depender de um agente. Veja [`scripts/README.md`](scripts/README.md) para detalhes.
+
+---
+
+## Referências
+
+Fontes oficiais que embasam as convenções, fluxos e guardrails deste template:
+
+| Fonte | O que cobre |
+|---|---|
+| [k6 Docs — Web Dashboard](https://grafana.com/docs/k6/latest/results-output/web-dashboard/) | Variáveis de ambiente do dashboard (`K6_WEB_DASHBOARD_OPEN`, `K6_WEB_DASHBOARD_EXPORT`, etc.) |
+| [k6 Docs — Configure AI assistant (MCP)](https://grafana.com/docs/k6/latest/set-up/configure-ai-assistant/) | Ferramentas MCP, recursos (`docs://k6/best_practices`, `types://k6/...`) e prompts nativos |
+| [grafana/mcp-k6 — GitHub](https://github.com/grafana/mcp-k6) | Repositório oficial do servidor MCP k6 |
+| [k6 Docs — Test types](https://grafana.com/docs/k6/latest/testing-guides/test-types/) | Definição de smoke, load, stress, spike, soak e breakpoint |
+| [VS Code — Agent Customization](https://code.visualstudio.com/docs/copilot/customization/overview) | Estrutura de `.instructions.md`, `.prompt.md`, `.agent.md` e `SKILL.md` |

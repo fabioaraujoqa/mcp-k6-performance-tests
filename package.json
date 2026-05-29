@@ -1,0 +1,13 @@
+{
+  "name": "mcp-k6-performance-tests",
+  "version": "1.0.0",
+  "description": "Scripts de automação para chamar o k6 MCP sem agente de IA",
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate.js",
+    "run-test": "node scripts/run.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  }
+}
